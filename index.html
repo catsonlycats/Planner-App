@@ -27,9 +27,9 @@ label{display:block;margin:10px 0 4px;color:var(--mute);font-size:14px}input,sel
 .hd{background:var(--acbg);border:1px solid var(--line);border-left:4px solid var(--ac);border-radius:16px;padding:16px 18px;margin:4px 0 14px}.hd h1{margin:0;font-size:27px;line-height:1.25}.ac{color:var(--ac)}
 .tb{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;position:sticky;top:env(safe-area-inset-top,0);background:var(--bg);padding:6px 0;z-index:6}.tb button{min-width:44px;min-height:44px;background:none;border:1px solid var(--line);border-radius:8px}
 .ed{min-height:50vh;border:1px solid var(--line);border-radius:12px;padding:14px;outline:0;overflow-wrap:anywhere}.ed:empty:before{content:'Start writing…';color:var(--mute)}.ed img{max-width:100%;border-radius:10px;margin:6px 0}.ed [style*=background]{color:#111}
-#layer{position:absolute;left:0;top:0;width:100%;height:0;z-index:8}.st{position:absolute;width:200px;border-radius:12px;color:#1a1a18;box-shadow:0 6px 18px #0006}
+#layer{position:absolute;left:0;top:0;width:100%;height:0;z-index:8}.st{position:absolute;width:224px;border-radius:12px;color:#1a1a18;box-shadow:0 6px 18px #0006}
 .st.c{width:46px;height:46px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:grab;touch-action:none}.sh{display:flex;gap:7px;align-items:center;padding:9px;cursor:grab;touch-action:none}
-.sd{width:18px;height:18px;border-radius:50%;border:1px solid #0005}.sh b{margin-left:auto;padding:2px 8px;font-weight:400}.sh b+b{margin-left:0}
+.sd{width:16px;height:16px;border-radius:50%;border:1px solid #0005}.sb{background:none;border:0;color:#1a1a18;cursor:pointer;margin-left:auto;min-width:38px;min-height:38px;font-size:18px;padding:0 6px}.sb+.sb{margin-left:0}.sb.arm{font-size:13px;font-weight:700;color:#a11}.sd{cursor:pointer}
 .st textarea{width:100%;height:120px;background:none;border:0;color:#1a1a18;resize:none;padding:2px 10px 10px;font-size:16px}
 .sf{width:46px;height:46px;right:23px;bottom:calc(154px + env(safe-area-inset-bottom));font-size:20px;background:var(--panel);color:var(--fg);border:1px solid var(--line)}
 </style></head><body><main id="v"></main><div id="layer"></div><button class="fab" id="fab" aria-label="Add">+</button><button class="fab sf" id="sfab" aria-label="Add sticky note">✎</button><input type="file" accept="image/*" id="pf" hidden>
@@ -46,17 +46,17 @@ const T={assignment:['Assignment','#e8a0a8'],deadline:['Other deadline','#f0c987
 const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,'0'),ds=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),pd=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
 const DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
 let S;try{S=JSON.parse(localStorage.getItem('planner.v1'))||{items:[]}}catch(e){S={items:[]}}S.notes=S.notes||[];S.stickies=S.stickies||[];
-const save=()=>{try{localStorage.setItem('planner.v1',JSON.stringify(S))}catch(e){if(!window._w){window._w=1;alert('Storage is full. Export a backup and remove some pictures.')}}};
+const save=()=>{S.mod=Date.now();try{localStorage.setItem('planner.v1',JSON.stringify(S))}catch(e){if(!window._w){window._w=1;alert('Storage is full. Export a backup and remove some pictures.')}}push()};
 let nid=null,view='home',mode='month',cur=new Date(),sel=ds(new Date()),filt='all';
 const nth=(y,m,w,n)=>{let d=new Date(y,m,1);while(d.getDay()!=w)d.setDate(d.getDate()+1);d.setDate(d.getDate()+7*(n-1));return d},last=(y,m,w)=>{let d=new Date(y,m+1,0);while(d.getDay()!=w)d.setDate(d.getDate()-1);return d};
 function hol(y){return[[new Date(y,0,1),"New Year's Day"],[nth(y,0,1,3),'Martin Luther King Jr. Day'],[nth(y,1,1,3),"Presidents' Day"],[last(y,4,1),'Memorial Day'],[new Date(y,5,19),'Juneteenth'],[new Date(y,6,4),'Independence Day'],[nth(y,8,1,1),'Labor Day'],[nth(y,9,1,2),'Columbus Day'],[new Date(y,10,11),'Veterans Day'],[nth(y,10,4,4),'Thanksgiving'],[new Date(y,11,25),'Christmas Day']].map(([d,t])=>({type:'holiday',title:t,date:ds(d),ro:1}))}
 function on(d){const dt=pd(d),o=[];S.items.forEach(i=>{let h=i.date===d;if(!h&&i.repeat==='yearly'){const a=pd(i.date);h=a.getMonth()==dt.getMonth()&&a.getDate()==dt.getDate()&&d>=i.date}
-if(!h&&i.repeat==='weekly')h=(i.days||[]).includes(dt.getDay())&&d>=i.date&&(!i.until||d<=i.until);if(h)o.push(i)});hol(dt.getFullYear()).forEach(h=>{if(h.date===d)o.push(h)});return o.sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'))}
+if(!h&&i.repeat==='weekly')h=(i.days||[]).includes(dt.getDay())&&d>=i.date&&(!i.until||d<=i.until);if(h)o.push(i)});FEED.forEach(i=>{if(i.date===d)o.push(i)});hol(dt.getFullYear()).forEach(h=>{if(h.date===d)o.push(h)});return o.sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'))}
 function next(n,fn){const r=[];let d=new Date();for(let k=0;k<n;k++){const s=ds(d);on(s).forEach(i=>{if(!fn||fn(i))r.push([s,i])});d.setDate(d.getDate()+1)}return r}
 const nice=s=>{const d=pd(s),t=ds(new Date()),tm=new Date();tm.setDate(tm.getDate()+1);return(s===t?'Today':s===ds(tm)?'Tomorrow':DN[d.getDay()]+', '+MN[d.getMonth()].slice(0,3)+' '+d.getDate())};
 const tf=i=>i.time?(i.endTime?i.time+'–'+i.endTime:i.time):'';
 function row(i,s,ctl){const c=T[i.type][1],ix=S.items.indexOf(i),x=(i.type==='assignment'||i.type==='deadline'||i.type==='reminder')&&i.repeat!=='weekly';
-return`<div class="row ${i.done?'done':''}"><span class="dot" style="background:${c}"></span><div><b>${esc(i.title)}</b><small>${[s?nice(s):'',tf(i),i.repeat==='weekly'&&i.days?'Every '+i.days.map(d=>DN[d]).join(', '):'',T[i.type][0],i.notes?esc(i.notes):''].filter(Boolean).join(' · ')}</small></div>${ctl&&ix>=0?`${x?`<button class="ic" data-a="done" data-i="${ix}" aria-label="Mark done">${i.done?'↺':'✓'}</button>`:''}<button class="ic" data-a="del" data-i="${ix}" aria-label="Delete">✕</button>`:''}</div>`}
+return`<div class="row ${i.done?'done':''}"><span class="dot" style="background:${c}"></span><div><b>${esc(i.title)}</b><small>${[s?nice(s):'',tf(i),i.repeat==='weekly'&&i.days?'Every '+i.days.map(d=>DN[d]).join(', '):'',T[i.type][0],i.src||'',i.notes?esc(i.notes):''].filter(Boolean).join(' · ')}</small></div>${ctl&&ix>=0?`${x?`<button class="ic" data-a="done" data-i="${ix}" aria-label="Mark done">${i.done?'↺':'✓'}</button>`:''}<button class="ic" data-a="del" data-i="${ix}" aria-label="Delete">✕</button>`:''}</div>`}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const list=(a,ctl,empty)=>a.length?a.map(([s,i])=>row(i,s,ctl)).join(''):`<div class="empty">${empty}</div>`;
 function grid(small){const y=cur.getFullYear(),m=cur.getMonth(),f=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate(),t=ds(new Date());let h=DN.map(d=>`<div class="h">${d[0]}</div>`).join('');
@@ -83,16 +83,20 @@ if(a==='gost'){const t=S.stickies.find(x=>x.id===id);if(t){t.open=true;view=t.pa
 if(a==='dst'){if(confirm('Delete this sticky note?')){S.stickies=S.stickies.filter(x=>x.id!==id);save();render()}return 1}
 if(a==='pic'){$('#pf').click();return 1}
 if(a==='drw'){clr();$('#dd').showModal();return 1}
+if(a==='fd'){loadFeed(1);return 1}
+if(a==='sy'){pull().then(()=>{if(view==='set')render()});return 1}
+if(a==='so'){AU=null;localStorage.removeItem('planner.auth');sst='';render();return 1}
+if(a==='si'||a==='su'){const em=$('#em').value.trim(),pw=$('#pw').value;(async()=>{try{const j=await auth(a==='si'?'token?grant_type=password':'signup',{email:em,password:pw});if(setAu(j))await pull();else sst='Check your email to confirm your account, then sign in.'}catch(e){sst=e.message}render()})();return 1}
 return 0}
-const SC=['#c7b3f5','#f6e27a','#a8e0a0','#f4b6c8'];
-function addSt(){S.stickies.push({id:Date.now(),page:view,x:Math.max(8,(innerWidth-200)/2),y:scrollY+140,color:SC[S.stickies.length%4],text:'',open:true});save();render()}
-function stk(){$('#layer').innerHTML=S.stickies.filter(t=>t.page===view).map(t=>{const p=`left:${Math.max(0,Math.min(t.x,innerWidth-(t.open?208:54)))}px;top:${t.y}px;background:${t.color}`;
-return t.open?`<div class="st" data-id="${t.id}" style="${p}"><div class="sh">${SC.map(c=>`<span class="sd" data-s="col" data-c="${c}" style="background:${c}"></span>`).join('')}<b data-s="min" aria-label="Close">–</b><b data-s="del" aria-label="Delete">✕</b></div><textarea data-s="tx" placeholder="Write something">${esc(t.text)}</textarea></div>`:`<div class="st c" data-id="${t.id}" style="${p}" title="Open">✎</div>`}).join('')}
+let armed=null;const SC=['#c7b3f5','#f6e27a','#a8e0a0','#f4b6c8'];
+function addSt(){S.stickies.push({id:Date.now(),page:view,x:Math.max(8,(innerWidth-224)/2),y:scrollY+140,color:SC[S.stickies.length%4],text:'',open:true});save();render()}
+function stk(){$('#layer').innerHTML=S.stickies.filter(t=>t.page===view).map(t=>{const p=`left:${Math.max(0,Math.min(t.x,innerWidth-(t.open?232:54)))}px;top:${t.y}px;background:${t.color}`;
+return t.open?`<div class="st" data-id="${t.id}" style="${p}"><div class="sh">${SC.map(c=>`<span class="sd" data-s="col" data-c="${c}" style="background:${c}"></span>`).join('')}<button type="button" class="sb" data-s="min" aria-label="Minimize">–</button><button type="button" class="sb ${armed===t.id?'arm':''}" data-s="del" aria-label="Delete">${armed===t.id?'Delete?':'✕'}</button></div><textarea data-s="tx" placeholder="Write something">${esc(t.text)}</textarea></div>`:`<div class="st c" data-id="${t.id}" style="${p}" title="Open">✎</div>`}).join('')}
 (()=>{const L=$('#layer');let d=null;const sf=e=>{const el=e.target.closest('.st');return el&&S.stickies.find(x=>x.id==el.dataset.id)};
-L.addEventListener('pointerdown',e=>{const el=e.target.closest('.st');if(!el)return;if(!(el.classList.contains('c')||(e.target.closest('.sh')&&!e.target.closest('[data-s]'))))return;d={el,t:sf(e),x:e.clientX,y:e.clientY,l:el.offsetLeft,o:el.offsetTop,m:0};el.setPointerCapture(e.pointerId)});
-L.addEventListener('pointermove',e=>{if(!d)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;if(Math.abs(dx)+Math.abs(dy)>6)d.m=1;if(d.m){d.el.style.left=Math.max(0,d.l+dx)+'px';d.el.style.top=Math.max(0,d.o+dy)+'px'}});
+L.addEventListener('pointerdown',e=>{const el=e.target.closest('.st');if(!el)return;if(!(el.classList.contains('c')||(e.target.closest('.sh')&&!e.target.closest('[data-s]'))))return;d={el,t:sf(e),x:e.clientX,y:e.clientY,l:el.offsetLeft,o:el.offsetTop,m:0};});
+L.addEventListener('pointermove',e=>{if(!d)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;if(!d.m&&Math.abs(dx)+Math.abs(dy)>6){d.m=1;try{d.el.setPointerCapture(e.pointerId)}catch(x){}}if(d.m){d.el.style.left=Math.max(0,d.l+dx)+'px';d.el.style.top=Math.max(0,d.o+dy)+'px'}});
 L.addEventListener('pointerup',()=>{if(!d)return;const{el,t,m}=d;d=null;if(m){t.x=el.offsetLeft;t.y=el.offsetTop;save()}else if(el.classList.contains('c')){t.open=true;save();stk()}});
-L.addEventListener('click',e=>{const q=e.target.closest('[data-s]');if(!q)return;const t=sf(e);if(!t)return;const k=q.dataset.s;if(k==='col')t.color=q.dataset.c;else if(k==='min')t.open=false;else if(k==='del'){if(!confirm('Delete this sticky note?'))return;S.stickies=S.stickies.filter(x=>x!==t)}else return;save();stk()});
+L.addEventListener('click',e=>{const q=e.target.closest('[data-s]');if(!q)return;const t=sf(e);if(!t)return;const k=q.dataset.s;if(k==='col')t.color=q.dataset.c;else if(k==='min')t.open=false;else if(k==='del'){if(armed!==t.id){armed=t.id;setTimeout(()=>{if(armed===t.id){armed=null;stk()}},3000);stk();return}armed=null;S.stickies=S.stickies.filter(x=>x!==t)}else return;save();stk()});
 L.addEventListener('input',e=>{const t=sf(e);if(t&&e.target.dataset.s==='tx'){t.text=e.target.value;save()}})})();
 document.addEventListener('input',e=>{if(e.target.id==='ed'||e.target.id==='nt')ns()});
 document.addEventListener('mousedown',e=>{if(e.target.closest&&e.target.closest('.tb'))e.preventDefault()});
@@ -105,14 +109,56 @@ cv.onpointermove=e=>{if(!dr)return;const[x,y]=pt(e),c=X();c.strokeStyle=pen;c.li
 $('#pc').innerHTML=['#111','#7a5bd0','#d33','#2a7de1'].map(c=>`<button type="button" class="ic" data-pen="${c}" style="background:${c}" aria-label="Pen color"></button>`).join('');
 $('#pc').onclick=e=>{const q=e.target.closest('[data-pen]');if(q)pen=q.dataset.pen};
 $('#dclr').onclick=clr;$('#dcx').onclick=()=>$('#dd').close();$('#dok').onclick=()=>{insImg(cv.toDataURL('image/png'));$('#dd').close()};$('#sfab').onclick=addSt;
+const WK='https://planner-app.sshokravii.workers.dev',SB='https://wczvcmrjzzfhjnaujalh.supabase.co',KEY='sb_publishable_cNxfsLHq_1gaOdYOZZ1I6w_JNs0gP2c';
+let FEED=[],FOK={},fst=0,ferr='',sst='',ptm=null,AU=null;
+try{AU=JSON.parse(localStorage.getItem('planner.auth'))}catch(e){}
+try{const c=JSON.parse(localStorage.getItem('planner.feed'));if(c){FEED=c.items||[];FOK=c.ok||{};fst=c.t||0}}catch(e){}
+const tm=()=>new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),dayOf=x=>new Date(x.getFullYear(),x.getMonth(),x.getDate());
+function pdt(v){const m=v.match(/^(\d{4})(\d\d)(\d\d)(?:T(\d\d)(\d\d)(\d\d)?(Z)?)?$/);if(!m)return null;if(m[4]===undefined)return{d:new Date(+m[1],m[2]-1,+m[3]),a:1};const a=[+m[1],m[2]-1,+m[3],+m[4],+m[5],+(m[6]||0)];return{d:m[7]?new Date(Date.UTC(...a)):new Date(...a),a:0}}
+function ics(txt,src){const ev=[],ov=new Set(),out=[];let c=null;
+for(const l of txt.replace(/\r/g,'').replace(/\n[ \t]/g,'').split('\n')){
+if(l==='BEGIN:VEVENT'){c={ex:[]};continue}
+if(l==='END:VEVENT'){if(c&&c.s){if(c.rid)ov.add(c.u+'|'+ds(c.rid.d));if(!c.x)ev.push(c)}c=null;continue}
+if(!c)continue;const i=l.indexOf(':');if(i<0)continue;const k=l.slice(0,i).split(';')[0],v=l.slice(i+1);
+if(k==='SUMMARY')c.t=v.replace(/\\([,;n])/g,(m,x)=>x==='n'?' ':x);else if(k==='DTSTART')c.s=pdt(v);else if(k==='UID')c.u=v;else if(k==='RRULE')c.r=v;else if(k==='RECURRENCE-ID')c.rid=pdt(v);
+else if(k==='EXDATE')v.split(',').forEach(x=>{const q=pdt(x);if(q)c.ex.push(ds(q.d))});else if(k==='STATUS'&&v==='CANCELLED')c.x=1}
+const w0=new Date();w0.setDate(w0.getDate()-7);w0.setHours(0,0,0,0);const w1=new Date();w1.setDate(w1.getDate()+180);
+const add=(e,d)=>{const s=ds(d);if(d<w0||d>w1||e.ex.includes(s)||(!e.rid&&ov.has(e.u+'|'+s)))return;out.push({feed:1,ro:1,src,uid:e.u,type:src==='Canvas'&&/assignment/i.test(e.u||'')?'assignment':'event',title:e.t||'(no title)',date:s,time:e.s.a?'':pad(e.s.d.getHours())+':'+pad(e.s.d.getMinutes())})};
+const W=['SU','MO','TU','WE','TH','FR','SA'];
+ev.forEach(e=>{const b=dayOf(e.s.d);if(!e.r){add(e,b);return}
+const p={};e.r.split(';').forEach(x=>{const[a,z]=x.split('=');p[a]=z});const iv=+p.INTERVAL||1,un=p.UNTIL&&pdt(p.UNTIL),cnt=+p.COUNT||0,wd=p.BYDAY?p.BYDAY.split(','):null,end=un?new Date(Math.min(un.d,w1)):w1;let n=0;
+for(let d=new Date(b),k=0;d<=end;d.setDate(d.getDate()+1),k++){let ok=false;const dw=d.getDay();
+if(p.FREQ==='DAILY')ok=k%iv===0;
+else if(p.FREQ==='WEEKLY')ok=wd?wd.some(x=>x.slice(-2)===W[dw])&&Math.floor(k/7)%iv===0:k%(7*iv)===0;
+else if(p.FREQ==='MONTHLY'){const mo=(d.getFullYear()-b.getFullYear())*12+d.getMonth()-b.getMonth();ok=mo%iv===0&&(wd?wd.some(x=>{const q=x.match(/^(-?\d)?(..)$/);return q&&q[2]===W[dw]&&(!q[1]||+q[1]===Math.ceil(d.getDate()/7))}):d.getDate()===b.getDate())}
+else if(p.FREQ==='YEARLY')ok=(d.getFullYear()-b.getFullYear())%iv===0&&d.getMonth()===b.getMonth()&&d.getDate()===b.getDate();
+if(ok){n++;if(cnt&&n>cnt)break;add(e,new Date(d))}}});
+return out}
+async function loadFeed(force){if(!force&&fst&&Date.now()-fst<9e5)return;
+try{const r=await fetch(WK,{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json(),it=[];FOK={canvas:!!j.canvas,google:!!j.google};if(j.canvas)it.push(...ics(j.canvas,'Canvas'));if(j.google)it.push(...ics(j.google,'Google'));FEED=it;fst=Date.now();ferr='';try{localStorage.setItem('planner.feed',JSON.stringify({t:fst,items:it,ok:FOK}))}catch(e){}}
+catch(e){ferr='Could not reach your calendar feeds. Showing the last saved copy.'}
+if(!(view==='note'&&nid))render()}
+const sbh=t=>({'apikey':KEY,'Authorization':'Bearer '+t,'Content-Type':'application/json'});
+async function auth(p,b){const r=await fetch(SB+'/auth/v1/'+p,{method:'POST',headers:{'apikey':KEY,'Content-Type':'application/json'},body:JSON.stringify(b)});const j=await r.json();if(!r.ok)throw new Error(j.msg||j.error_description||j.message||'Sign-in failed');return j}
+function setAu(j){if(!j.access_token)return false;AU={at:j.access_token,rt:j.refresh_token,exp:Date.now()+(j.expires_in||3600)*1000,uid:j.user.id,email:j.user.email};localStorage.setItem('planner.auth',JSON.stringify(AU));return true}
+async function tok(){if(!AU)return null;if(Date.now()>AU.exp-60000){try{if(!setAu(await auth('token?grant_type=refresh_token',{refresh_token:AU.rt})))throw 0}catch(e){AU=null;localStorage.removeItem('planner.auth');sst='Please sign in again.';return null}}return AU.at}
+async function push(now){if(!AU)return;clearTimeout(ptm);const go=async()=>{const t=await tok();if(!t)return;try{const r=await fetch(SB+'/rest/v1/planner_data?on_conflict=user_id',{method:'POST',headers:{...sbh(t),'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({user_id:AU.uid,data:S,updated_at:new Date(S.mod||Date.now()).toISOString()})});if(!r.ok)throw 0;sst='Synced '+tm()}catch(e){sst='Sync failed. Will retry on the next change.'}};if(now)return go();ptm=setTimeout(go,3000)}
+async function pull(){const t=await tok();if(!t)return;
+try{const r=await fetch(SB+'/rest/v1/planner_data?select=data&user_id=eq.'+AU.uid,{headers:sbh(t)});if(!r.ok)throw 0;const a=await r.json();
+if(a.length&&(!S.mod||(a[0].data.mod||0)>S.mod)){S=a[0].data;S.items=S.items||[];S.notes=S.notes||[];S.stickies=S.stickies||[];try{localStorage.setItem('planner.v1',JSON.stringify(S))}catch(e){}theme();sst='Synced '+tm();if(!(view==='note'&&nid))render()}
+else{if(!a.length&&!S.mod){S.mod=Date.now();try{localStorage.setItem('planner.v1',JSON.stringify(S))}catch(e){}}if(!a.length||S.mod>(a[0].data.mod||0))await push(1);else sst='Synced '+tm()}}
+catch(e){sst='Could not sync. Check your connection.'}}
+const acct=()=>AU?`<h2>Account and sync</h2><small class="m">Signed in as ${esc(AU.email)}. ${esc(sst)}</small><div class="bar" style="justify-content:flex-start;margin-top:10px"><button class="btn" data-a="sy">Sync now</button><button class="btn g" data-a="so">Sign out</button></div>`:`<h2>Account and sync</h2><input id="em" type="email" placeholder="Email" autocomplete="email"><input id="pw" type="password" placeholder="Password (6+ characters)" autocomplete="current-password" style="margin-top:8px"><div class="bar" style="justify-content:flex-start;margin-top:10px"><button class="btn" data-a="si">Sign in</button><button class="btn g" data-a="su">Create account</button></div><small class="m">${esc(sst)||'Sign in to sync between your devices.'}</small>`;
+const feeds=()=>`<h2>Calendar feeds</h2><div class="bar" style="justify-content:flex-start"><button class="btn" data-a="fd">Refresh now</button></div><small class="m">Canvas: ${FOK.canvas?'connected':'not loaded'} · Google: ${FOK.google?'connected':'not loaded'}${fst?' · updated '+tm2(fst):''}</small>${ferr?`<small class="m" style="display:block;color:#e88">${ferr}</small>`:''}`;
+const tm2=t=>new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
 function wk(){const t=new Date(),m=new Date(t.getFullYear(),t.getMonth(),t.getDate()-((t.getDay()+6)%7));let h='';for(let k=0;k<7;k++){const d=new Date(m.getFullYear(),m.getMonth(),m.getDate()+k),s=ds(d),ty=[...new Set(on(s).map(i=>i.type))].slice(0,4);h+=`<button class="d ${s===ds(t)?'t':''}" data-a="wday" data-s="${s}"><small>${DN[d.getDay()]}</small>${d.getDate()}<span class="dots">${ty.map(y=>`<i style="background:${T[y][1]}"></i>`).join('')}</span></button>`}return`<div class="grid wk">${h}</div>`}
-function render(){$('#fab').style.display=view==='set'||view==='note'?'none':'';document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===(view==='dead'?'rem':view)));let h='';
+function render(){$('#fab').style.display=view==='set'||view==='note'?'none':'';$('#sfab').style.display=view==='note'?'none':'';document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===(view==='dead'?'rem':view)));let h='';
 if(view==='home'){const wl=next(7,i=>i.type!=='holiday'&&i.type!=='work'&&i.type!=='class'&&!i.done);
 h=`<div class="hd"><h1>Today is <span class="ac">${DNF[new Date().getDay()]}, ${MN[new Date().getMonth()]} ${ord(new Date().getDate())}</span></h1></div>${wk()}<h2>This week</h2>${list(wl,0,'Nothing scheduled this week.')}
 <h2>Upcoming deadlines</h2>${list(next(60,i=>(i.type==='assignment'||i.type==='deadline')&&!i.done).slice(0,5),0,'No deadlines coming up.')}
 <h2>Holidays coming up</h2>${list(next(200,i=>i.type==='holiday').slice(0,3),0,'')}`}
-if(view==='set'){h=`${H('Settings')}<h2>Appearance</h2><div class="bar" style="justify-content:flex-start"><button class="btn ${S.theme==='light'?'g':''}" data-a="th" data-m="dark">Dark</button><button class="btn ${S.theme==='light'?'':'g'}" data-a="th" data-m="light">Light</button></div><h2>Work schedule</h2>${list(S.items.filter(i=>i.type==='work').map(i=>[i.repeat==='weekly'?'':i.date,i]),1,'No work days added yet.')}<div class="bar" style="margin-top:10px"><button class="btn" data-a="addwork">Add work schedule</button></div><small class="m">Weekly schedules repeat on the days you pick and also show on your calendar.</small><h2>Backup</h2><div class="bar"><button class="btn g" data-a="exp">Export data</button><button class="btn g" data-a="imp">Import data</button></div><small class="m">Everything is saved on this device. Export a backup file now and then, and import it to restore or move to another device.</small>`}
-if(view==='dead'){const a=S.items.filter(i=>(i.type==='assignment'||i.type==='deadline')&&(filt==='all'||i.type===filt)).sort((a,b)=>a.date.localeCompare(b.date)).map(i=>[i.date,i]);
+if(view==='set'){h=`${H('Settings')}<h2>Appearance</h2><div class="bar" style="justify-content:flex-start"><button class="btn ${S.theme==='light'?'g':''}" data-a="th" data-m="dark">Dark</button><button class="btn ${S.theme==='light'?'':'g'}" data-a="th" data-m="light">Light</button></div>${acct()}${feeds()}<h2>Work schedule</h2>${list(S.items.filter(i=>i.type==='work').map(i=>[i.repeat==='weekly'?'':i.date,i]),1,'No work days added yet.')}<div class="bar" style="margin-top:10px"><button class="btn" data-a="addwork">Add work schedule</button></div><small class="m">Weekly schedules repeat on the days you pick and also show on your calendar.</small><h2>Backup</h2><div class="bar"><button class="btn g" data-a="exp">Export data</button><button class="btn g" data-a="imp">Import data</button></div><small class="m">Everything is saved on this device. Export a backup file now and then, and import it to restore or move to another device.</small><small class="m" style="display:block;margin-top:14px">App version 4</small>`}
+if(view==='dead'){const a=S.items.concat(FEED.filter(i=>i.date>=ds(new Date()))).filter(i=>(i.type==='assignment'||i.type==='deadline')&&(filt==='all'||i.type===filt)).sort((a,b)=>a.date.localeCompare(b.date)).map(i=>[i.date,i]);
 h=`${H('Deadlines')}${seg('dead')}<div class="bar"><select id="fl" style="max-width:220px"><option value="all">Everything</option><option value="assignment">Assignments</option><option value="deadline">Other deadlines</option></select></div>${list(a,1,'No deadlines yet. Tap + to add one.')}`}
 if(view==='rem'){const a=S.items.filter(i=>i.type==='reminder').sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||''))).map(i=>[i.date,i]);h=`${H('Reminders')}${seg('rem')}${list(a,1,'No reminders yet. Tap + to add one.')}`}
 if(view==='cal'){h=`${H('Calendar')}<div class="bar"><div><button class="btn ${mode==='month'?'':'g'}" data-a="m" data-m="month">Month</button><button class="btn ${mode==='list'?'':'g'}" data-a="m" data-m="list">List</button></div></div>`;
@@ -134,5 +180,5 @@ if($('#t1').value)i.time=$('#t1').value;if($('#t2').value)i.endTime=$('#t2').val
 if(w){const d=[...wd.querySelectorAll('input:checked')].map(x=>+x.value);if(d.length){i.repeat='weekly';i.days=d;if($('#un').value)i.until=$('#un').value}}
 S.items.push(i);save();render()};
 if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
-theme();render();
+theme();render();loadFeed();if(AU)pull();document.addEventListener('visibilitychange',()=>{if(!document.hidden){loadFeed();if(AU)pull()}});
 </script></body></html>
