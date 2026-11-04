@@ -85,8 +85,8 @@ if(a==='pic'){$('#pf').click();return 1}
 if(a==='drw'){clr();$('#dd').showModal();return 1}
 if(a==='fd'){loadFeed(1);return 1}
 if(a==='sy'){pull().then(()=>{if(view==='set')render()});return 1}
-if(a==='so'){AU=null;localStorage.removeItem('planner.auth');sst='';render();return 1}
-if(a==='si'||a==='su'){const em=$('#em').value.trim(),pw=$('#pw').value;(async()=>{try{const j=await auth(a==='si'?'token?grant_type=password':'signup',{email:em,password:pw});if(setAu(j))await pull();else sst='Check your email to confirm your account, then sign in.'}catch(e){sst=e.message}render()})();return 1}
+if(a==='so'){AU=null;localStorage.removeItem('planner.auth');FEED=[];FOK={};fst=0;localStorage.removeItem('planner.feed');sst='';render();return 1}
+if(a==='si'||a==='su'){const em=$('#em').value.trim(),pw=$('#pw').value;(async()=>{try{const j=await auth(a==='si'?'token?grant_type=password':'signup',{email:em,password:pw});if(setAu(j)){await pull();loadFeed(1)}else sst='Check your email to confirm your account, then sign in.'}catch(e){sst=e.message}render()})();return 1}
 return 0}
 let armed=null;const SC=['#c7b3f5','#f6e27a','#a8e0a0','#f4b6c8'];
 function addSt(){S.stickies.push({id:Date.now(),page:view,x:Math.max(8,(innerWidth-224)/2),y:scrollY+140,color:SC[S.stickies.length%4],text:'',open:true});save();render()}
@@ -134,9 +134,9 @@ else if(p.FREQ==='MONTHLY'){const mo=(d.getFullYear()-b.getFullYear())*12+d.getM
 else if(p.FREQ==='YEARLY')ok=(d.getFullYear()-b.getFullYear())%iv===0&&d.getMonth()===b.getMonth()&&d.getDate()===b.getDate();
 if(ok){n++;if(cnt&&n>cnt)break;add(e,new Date(d))}}});
 return out}
-async function loadFeed(force){if(!force&&fst&&Date.now()-fst<9e5)return;
-try{const r=await fetch(WK,{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json(),it=[];FOK={canvas:!!j.canvas,google:!!j.google};if(j.canvas)it.push(...ics(j.canvas,'Canvas'));if(j.google)it.push(...ics(j.google,'Google'));FEED=it;fst=Date.now();ferr='';try{localStorage.setItem('planner.feed',JSON.stringify({t:fst,items:it,ok:FOK}))}catch(e){}}
-catch(e){ferr='Could not reach your calendar feeds. Showing the last saved copy.'}
+async function loadFeed(force){if(!force&&fst&&Date.now()-fst<9e5)return;ferr='';
+try{const t=await tok();if(!t){ferr='Sign in to load your calendar feeds.';throw 0}const r=await fetch(WK,{cache:'no-store',headers:{Authorization:'Bearer '+t}});if(!r.ok)throw 0;const j=await r.json(),it=[];FOK={canvas:!!j.canvas,google:!!j.google};if(j.canvas)it.push(...ics(j.canvas,'Canvas'));if(j.google)it.push(...ics(j.google,'Google'));FEED=it;fst=Date.now();ferr='';try{localStorage.setItem('planner.feed',JSON.stringify({t:fst,items:it,ok:FOK}))}catch(e){}}
+catch(e){ferr=ferr||'Could not load your calendar feeds. Showing the last saved copy.'}
 if(!(view==='note'&&nid))render()}
 const sbh=t=>({'apikey':KEY,'Authorization':'Bearer '+t,'Content-Type':'application/json'});
 async function auth(p,b){const r=await fetch(SB+'/auth/v1/'+p,{method:'POST',headers:{'apikey':KEY,'Content-Type':'application/json'},body:JSON.stringify(b)});const j=await r.json();if(!r.ok)throw new Error(j.msg||j.error_description||j.message||'Sign-in failed');return j}
@@ -157,7 +157,7 @@ if(view==='home'){const wl=next(7,i=>i.type!=='holiday'&&i.type!=='work'&&i.type
 h=`<div class="hd"><h1>Today is <span class="ac">${DNF[new Date().getDay()]}, ${MN[new Date().getMonth()]} ${ord(new Date().getDate())}</span></h1></div>${wk()}<h2>This week</h2>${list(wl,0,'Nothing scheduled this week.')}
 <h2>Upcoming deadlines</h2>${list(next(60,i=>(i.type==='assignment'||i.type==='deadline')&&!i.done).slice(0,5),0,'No deadlines coming up.')}
 <h2>Holidays coming up</h2>${list(next(200,i=>i.type==='holiday').slice(0,3),0,'')}`}
-if(view==='set'){h=`${H('Settings')}<h2>Appearance</h2><div class="bar" style="justify-content:flex-start"><button class="btn ${S.theme==='light'?'g':''}" data-a="th" data-m="dark">Dark</button><button class="btn ${S.theme==='light'?'':'g'}" data-a="th" data-m="light">Light</button></div>${acct()}${feeds()}<h2>Work schedule</h2>${list(S.items.filter(i=>i.type==='work').map(i=>[i.repeat==='weekly'?'':i.date,i]),1,'No work days added yet.')}<div class="bar" style="margin-top:10px"><button class="btn" data-a="addwork">Add work schedule</button></div><small class="m">Weekly schedules repeat on the days you pick and also show on your calendar.</small><h2>Backup</h2><div class="bar"><button class="btn g" data-a="exp">Export data</button><button class="btn g" data-a="imp">Import data</button></div><small class="m">Everything is saved on this device. Export a backup file now and then, and import it to restore or move to another device.</small><small class="m" style="display:block;margin-top:14px">App version 4</small>`}
+if(view==='set'){h=`${H('Settings')}<h2>Appearance</h2><div class="bar" style="justify-content:flex-start"><button class="btn ${S.theme==='light'?'g':''}" data-a="th" data-m="dark">Dark</button><button class="btn ${S.theme==='light'?'':'g'}" data-a="th" data-m="light">Light</button></div>${acct()}${feeds()}<h2>Work schedule</h2>${list(S.items.filter(i=>i.type==='work').map(i=>[i.repeat==='weekly'?'':i.date,i]),1,'No work days added yet.')}<div class="bar" style="margin-top:10px"><button class="btn" data-a="addwork">Add work schedule</button></div><small class="m">Weekly schedules repeat on the days you pick and also show on your calendar.</small><h2>Backup</h2><div class="bar"><button class="btn g" data-a="exp">Export data</button><button class="btn g" data-a="imp">Import data</button></div><small class="m">Everything is saved on this device. Export a backup file now and then, and import it to restore or move to another device.</small><small class="m" style="display:block;margin-top:14px">App version 5</small>`}
 if(view==='dead'){const a=S.items.concat(FEED.filter(i=>i.date>=ds(new Date()))).filter(i=>(i.type==='assignment'||i.type==='deadline')&&(filt==='all'||i.type===filt)).sort((a,b)=>a.date.localeCompare(b.date)).map(i=>[i.date,i]);
 h=`${H('Deadlines')}${seg('dead')}<div class="bar"><select id="fl" style="max-width:220px"><option value="all">Everything</option><option value="assignment">Assignments</option><option value="deadline">Other deadlines</option></select></div>${list(a,1,'No deadlines yet. Tap + to add one.')}`}
 if(view==='rem'){const a=S.items.filter(i=>i.type==='reminder').sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||''))).map(i=>[i.date,i]);h=`${H('Reminders')}${seg('rem')}${list(a,1,'No reminders yet. Tap + to add one.')}`}
